@@ -1,0 +1,40 @@
+# MTPSelf / telemt — пример конфига. install.sh генерирует config.toml,
+# подставляя секрет, tls_domain и публичный хост. Схема — telemt v3.
+
+[general]
+use_middle_proxy = true
+log_level = "normal"            # debug | verbose | normal | silent
+
+[general.modes]
+classic = false
+secure  = false
+tls     = true                  # FakeTLS (ee) — единственный режим, который маскируется
+
+[general.links]
+show        = "*"
+public_host = "203.0.113.10"    # IP или домен сервера для tg://-ссылок
+public_port = 443
+
+[server]
+port           = 443
+metrics_listen = "127.0.0.1:9090"
+
+[server.api]
+enabled   = true
+listen    = "127.0.0.1:9091"
+whitelist = ["127.0.0.1/32", "::1/128"]
+
+[[server.listeners]]
+ip = "0.0.0.0"
+
+[censorship]
+# SNI-домен маскировки. telemt прозрачно сплайсит «чужой» трафик к этому РЕАЛЬНОМУ сайту
+# (нужен достижимый с сервера HTTPS-хост с TLS 1.3). Смена домена инвалидирует старые ee-ссылки.
+tls_domain    = "www.microsoft.com"
+mask          = true
+tls_emulation = true            # подтягивает реальные длины TLS-записей и эмулирует их
+tls_front_dir = "tlsfront"      # кэш в tmpfs /etc/telemt
+
+[access.users]
+# формат: "логин" = "32 hex-символа секрета"
+user = "00000000000000000000000000000000"
